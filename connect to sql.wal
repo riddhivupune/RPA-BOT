@@ -1,0 +1,24 @@
+™defVar --name connecction --type DbConnection
+defVar --name connection --type DbConnection
+defVar --name albums --type DataTable
+defVar --name AlbumId --type String
+defVar --name sqlCommand --type Numeric
+defVar --name album --type String
+defVar --name readCsv --type String
+defVar --name row --type Numeric
+defVar --name Title --type String
+defVar --name ArtistId --type String
+readCSV --filepath "E:\\ALL FILES\\Desktop\\Album.csv" --delimiter "," --hasheaders  --missingfieldaction "ParseError" albums=value
+logMessage --message "${albums}" --type "Info"
+mysqlConnect --connectionstring "server=localhost;User Id=root;database=ibm_rpabot; password=rid " connection=connection
+sqlExecute --connection ${connection} --statement "select * from album;" sqlCommand=value
+for --variable ${row} --from 1 --to ${albums.Rows} --step 1
+	mapTableRow --dataTable ${albums} --row ${row} --mappings "[{\"Name\":\"AlbumId\",\"Number\":\"1\",\"Output\":\"${AlbumId}\"},{\"Name\":\"Title\",\"Number\":\"2\",\"Output\":\"${Title}\"},{\"Name\":\"ArtistId\",\"Number\":\"3\",\"Output\":\"${ArtistId}\"}]"
+	sqlExecute --connection ${connection} --statement "LOAD DATA INFILE \'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/Album.csv\' \nINTO TABLE  album\nFIELDS TERMINATED BY \',\'  \nOPTIONALLY ENCLOSED BY \'\"\'  \nLINES TERMINATED BY \'\\r\\n\'   \nIGNORE 1 ROWS;" sqlCommand=value
+	sqlExecute --connection ${connection} --statement "select * from album;" sqlCommand=value
+next
+sqlExecute --connection ${connection} --statement "insert into album\r\nvalues(\'7\',\'ikigai\',\'7\');" sqlCommand=value
+beginSub --name insertdatabase
+endSub
+beginRules --name extractfromcsv
+endRules*23.0.6.0
